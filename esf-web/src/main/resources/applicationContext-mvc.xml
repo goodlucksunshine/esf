@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"
+       default-lazy-init="true">
+
+    <!--启用controller注解-->
+    <mvc:annotation-driven>
+        <mvc:argument-resolvers>
+            <!-- 让controller支持device注解-->
+            <bean class="org.springframework.mobile.device.DeviceWebArgumentResolver"/>
+            <!-- 让SitePreference支持在controller使用 -->
+            <bean class="org.springframework.mobile.device.site.SitePreferenceWebArgumentResolver"/>
+        </mvc:argument-resolvers>
+    </mvc:annotation-driven>
+
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <!-- Controller注解扫描 -->
+    <context:component-scan base-package="com.laile" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--自定义异常-->
+    <bean id="exceptionResolver" class="com.laile.esf.web.handler.CustomExceptionHandler"/>
+    <!-- 处理手机请求header user-Agent controller 通过Device判断是否手机请求-->
+    <bean id="deviceResolverHandlerInterceptor"
+          class="org.springframework.mobile.device.DeviceResolverHandlerInterceptor"/>
+    <!-- 支持通过设置网站访问偏好,可以始终手机或者nomal模式 -->
+    <bean id="sitePreferenceHandlerInterceptor"
+          class="org.springframework.mobile.device.site.SitePreferenceHandlerInterceptor"/>
+    <!-- 上传拦截，如最大上传值及最小上传值 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize">
+            <value>104857600</value>
+        </property>
+        <property name="maxInMemorySize">
+            <value>4096</value>
+        </property>
+        <property name="defaultEncoding">
+            <value>utf-8</value>
+        </property>
+    </bean>
+    <import resource="classpath*:/spring/spring-mvc.xml"/>
+</beans>
